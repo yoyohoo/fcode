@@ -10,10 +10,10 @@
 </head>
 
 <body>
-    <div>
-        输入内容： <input id="content" type="text" value="这是一个二维码"><button type="button" id="gen-btn">生成二维码</button>
+    <div style="padding-left:.25rem;">
+        <input id="content" type="text" value="这是一个二维码"><button id="gen-btn" type="button">生成二维码</button>
     </div>
-    <div id="code" style="width:250px;height:250px;margin:50% auto;left:50%;"></div>
+    <div id="code" style="position: absolute; width: 200px; height: 200px; top: 50%; left: 50%; margin-left: -100px; margin-top: -100px;"></div>
 </body>
 <script src="./lib/sea.min.js"></script>
 <script>

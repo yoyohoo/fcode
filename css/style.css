@@ -1,4 +1,9 @@
-html,
-body {
-    height: 100%;
+#content {
+    height: 1.1rem;
+    width: 200px;
+}
+
+#gen-btn {
+    height: 1.5rem;
+    margin-left: .25rem;
 }
