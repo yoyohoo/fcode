@@ -1,94 +1,57 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>HTML5 code Reader</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head>
-<style type="text/css">
-    html,
-    body {
-        height: 100%;
-        width: 100%;
-        text-align: center;
+<style>
+    #video {
+        display: block;
+        margin: 1em auto;
+        width: 180px;
+        height: 180px;
     }
-    /* input[node-type=jsbridge]{ 
-visibility: hidden; 
-}  */
 </style>
-<script src="lib/zepto.js"></script>
-<script src="lib/qrcode.min.js"></script>
-<script src="lib/qrcode.js"></script>
+<video id="video" autoplay></video>
 <script>
-    //初始化扫描二维码按钮，传入自定义的 node-type 属性 
-    $(function () {
-        Qrcode.init($('[node-type=jsbridge]'));
-    });
-    (function ($) {
-        var Qrcode = function (tempBtn) {
-            //该对象只支持微博域下的解析，也就是说不是微博域下的页面只能用第二种方案解析二维码 
-            if (window.WeiboJSBridge) {
-                $(tempBtn).on('click', this.weiBoBridge);
-            } else {
-                $(tempBtn).on('change', this.getImgFile);
-            }
-        };
-        Qrcode.prototype = {
-            weiBoBridge: function () {
-                WeiboJSBridge.invoke('scanQRCode', null, function (params) {
-                    //得到扫码的结果 
-                    location.href = params.result;
-                });
-            },
-            getImgFile: function () {
-                var _this_ = this;
-                var imgFile = $(this)[0].files;
-                var oFile = imgFile[0];
-                var oFReader = new FileReader();
-                var rFilter =
-                    /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
-                if (imgFile.length === 0) {
-                    return;
-                }
-                if (!rFilter.test(oFile.type)) {
-                    alert("选择正确的图片格式!");
-                    return;
-                }
-                //读取图片成功后执行的代码 
-                oFReader.onload = function (oFREvent) {
-                    qrcode.decode(oFREvent.target.result);
-                    qrcode.callback = function (data) {
-                        //得到扫码的结果 
-                        location.href = data;
-                        alert(location.href);
-                    };
-                };
-                oFReader.readAsDataURL(oFile);
-            },
-            destory: function () {
-                $(tempBtn).off('click');
-            }
-        };
-        //初始化 
-        Qrcode.init = function (tempBtn) {
-            var _this_ = this;
-            var inputDom;
-            tempBtn.each(function () {
-                new _this_($(this));
-            });
-            $('[node-type=qr-btn]').on('click', function () {
-                $(this).find('[node-type=jsbridge]')[0].click();
-            });
-        };
-        window.Qrcode = Qrcode;
-    })(window.Zepto ? Zepto : jQuery);
-</script>
+    window.addEventListener("DOMContentLoaded", function () {    
+        var video = document.getElementById("video"),
+            canvas, context;    
+        try {
+            canvas = document.createElement("canvas");
+            context = canvas.getContext("2d");    
+        } catch (e) {
+            alert("not support canvas!");
+            return;
+        }    
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia;
 
-<body>
 
-    <div class="qr-btn" node-type="jsbridge">扫描二维码1
-        <input node-type="jsbridge" type="file" name="myPhoto" value="扫描二维码1" />
-    </div>
-</body>
+            
+        if (navigator.getUserMedia)
+            navigator.getUserMedia({
+                "video": true
+            },   function (stream) {    
+                if (video.mozSrcObject !== undefined) video.mozSrcObject = stream;    
+                else video.src = ((window.URL || window.webkitURL || window.mozURL || window.msURL) &&
+                    window.URL.createObjectURL(stream)) || stream;
+                video.play();  
+            },   function (error) {     //if(error.PERMISSION_DENIED)console.log("用户拒绝了浏览器请求媒体的权限",error.code);
+                     //if(error.NOT_SUPPORTED_ERROR)console.log("当前浏览器不支持拍照功能",error.code);
+                     //if(error.MANDATORY_UNSATISFIED_ERROR)console.log("指定的媒体类型未接收到媒体流",error.code);
+                    
+                alert("Video capture error: " + error.code);  
+            });    
+        else alert("Native device media streaming (getUserMedia) not supported in this browser");    
 
-</html>
+
+            
+        setInterval(function () {
+            context.drawImage(video, 0, 0, canvas.width = video.videoWidth, canvas.height = video.videoHeight);    
+            alert(canvas.toDataURL().substr(22))  
+            // $.post('/Home/QRcodeDecode', {
+            //     "img": canvas.toDataURL().substr(22)
+            // }, function (data, status) {  
+            //     if (status == "success" && data != "no") location.href = "/Home/Result/" + data;  
+            // }, "text");    
+        }, 1000);
+
+
+          
+    }, false);
+</script> 
